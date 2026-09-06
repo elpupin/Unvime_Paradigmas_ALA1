@@ -6,52 +6,61 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-let tareas =[
-    {
-        titulo: '',
-        descripcion: '',
-        estado: '',
-        fechaCreacion: new Date(),
-        fechaVencimiento: null,
-        dificultad: ''
-    }
-];
+let tareas = [];
 
 function agregarTarea() {
     rl.question('Ingrese el titulo de la tarea: ', (titulo) => {
         rl.question('Ingrese la descripción de la tarea: ', (descripcion) => {
             rl.question('Ingrese la fecha de vencimiento de la tarea (YYYY-MM-DD): ', (fechaVencimiento) => {
                 rl.question('Ingrese la dificultad de la tarea: ', (dificultad) => {
-                const nuevaTarea = {
-                    titulo: titulo,
-                    descripcion: descripcion,
-                    estado: 'Pendiente',
-                    fechaCreacion: new Date(),
-                    fechaVencimiento: fechaVencimiento,
-                    dificultad: dificultad
-                };
-                tareas.push(nuevaTarea);
-                console.clear();
-                console.log(`Tarea agregada: ${titulo}`);
-                menuPrincipal();
-            });
-        });
-    });
-}
+                    
+                    const nuevaTarea = {
+                        titulo: titulo,
+                        descripcion: descripcion,
+                        estado: 'Pendiente',
+                        fechaCreacion: new Date(),
+                        fechaVencimiento: fechaVencimiento,
+                        dificultad: dificultad
+                    };
+                    
+                    tareas.push(nuevaTarea);
+                    console.clear();
+                    console.log(`Tarea agregada: ${titulo}`);
+                    
+                    // Volvemos al menú
+                    menuPrincipal();
+                    
+                }); // Cierra dificultad
+            }); // Cierra fechaVencimiento
+        }); // Cierra descripcion
+    }); // Cierra titulo
 }
 
 function buscarTareas() {
     rl.question('Ingrese el término de búsqueda: ', (termino) => {
         console.clear();
-        const resultados = tareas.filter(tarea => tarea.titulo.includes(termino)); //Chequear si se permite user .filter() e .include()
-        console.log(`Resultados de búsqueda para "${termino}". Desea ver los detalles de alguna tarea?`);
+        const resultados = [];
+        
+        // Búsqueda manual usando for e indexOf
+        for (let i = 0; i < tareas.length; i++) {
+            if (tareas[i].titulo.indexOf(termino) !== -1) {
+                resultados.push(tareas[i]);
+            }
+        }
+        
+        console.log(`Resultados de búsqueda para "${termino}".`);
         let contador = 1;
-        resultados.forEach(tarea => { //Chequear si se permite utilizar .forEach()
-            console.log(`${contador}. ${tarea.titulo}`);
+        
+        for (let i = 0; i < resultados.length; i++) {
+            console.log(`${contador}. ${resultados[i].titulo}`);
             contador++;
-        });
+        }
+        
+        console.log('\n¿Desea ver los detalles de alguna tarea? (Ingrese el número o 0 para volver)');
         rl.question('>' , (opcion) => {
             const index = parseInt(opcion) - 1;
+            
+            // Si elige una tarea válida
             if (index >= 0 && index < resultados.length) {
                 const tareaSeleccionada = resultados[index];
                 console.clear();
@@ -61,49 +70,48 @@ function buscarTareas() {
                 console.log(`Fecha de vencimiento: ${tareaSeleccionada.fechaVencimiento}`);
                 console.log(`Estado: ${tareaSeleccionada.estado}`);
                 console.log(`Dificultad: ${tareaSeleccionada.dificultad}`);
+            } else if (opcion !== '0') {
+                console.log('Opción no válida.');
             }
-
-        /*rl.question('Desea editar alguna tarea?: \n1. Sí\n2. No\n', (respuesta) => {
-            if (respuesta === '1') {
-                rl.question('Ingrese el título de la tarea a editar: ', (tituloEditar) => {
-                    for (let i = 0; i < tareas.length; i++) {
-                        if (tareas[i].titulo === tituloEditar) {
-                            var tarea = tareas[i];
-                            break;
-                        }
-                    }
-                    if (tarea) {
-                        rl.question('Ingrese el nuevo título de la tarea: ', (nuevoTitulo) => {
-                            rl.question('Ingrese la nueva descripción de la tarea: ', (nuevaDescripcion) => {
-                                tarea.titulo = nuevoTitulo;
-                                tarea.descripcion = nuevaDescripcion;
-                                console.clear();
-                                console.log(`Tarea editada: ${nuevoTitulo}`);
-                                menuPrincipal();
-                            });
-                        });
-                    } else {
-                        console.log('Tarea no encontrada.');
-                        menuPrincipal();
-                    }
-                });
-            } else {
+            
+            // Pausa para que el usuario lea, y luego volvemos al menú principal
+            console.log('\nPresione Enter para continuar...');
+            rl.question('', () => {
+                console.clear();
                 menuPrincipal();
-            }
-        });*/
-    });
-}
+            });
+            
+        }); // Cierra opcion
+    }); // Cierra termino
 }
 
 function mostrarTareas() {
     console.clear();
+    console.log('--- LISTA DE TAREAS ---');
+    
+    // Imprimimos las tareas con un for clásico
+    for (let i = 0; i < tareas.length; i++) {
+        console.log(`${i + 1}. [${tareas[i].estado}] ${tareas[i].titulo}`);
+    }
+    
+    if (tareas.length === 0) {
+        console.log('No hay tareas registradas.');
+    }
+    
+    // Pausa antes de volver al menú
+    console.log('\nPresione Enter para volver al menú principal...');
+    rl.question('', () => {
+        console.clear();
+        menuPrincipal();
+    });
 }
 
 function menuPrincipal() {
-    console.log('1. Agregar tarea');
+    console.log('\n1. Agregar tarea');
     console.log('2. Buscar tareas');
     console.log('3. Mostrar tareas');
     console.log('0. Salir');
+    
     rl.question('Seleccione una opción: ', (opcion) => {
         console.clear();
         switch (opcion) {
@@ -128,5 +136,6 @@ function menuPrincipal() {
     });
 }
 
+console.clear();
 console.log("Bienvenido a la aplicación de Lista de Tareas");
 menuPrincipal();
