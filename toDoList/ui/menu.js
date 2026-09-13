@@ -38,7 +38,7 @@ function agregarTarea() {
     console.log("1. Fácil");
     console.log("2. Media");
     console.log("3. Difícil");
-    const dificultad = rl.question('>');
+    const dificultad = parseInt(rl.question('> '));
     
     const nuevaTarea = {
         titulo: titulo,
@@ -54,6 +54,29 @@ function agregarTarea() {
     console.clear();
     console.log(`Tarea agregada: ${titulo}`);
     menuPrincipal();
+}
+
+function editarTarea(tareaSeleccionada) {
+    const titulo = rl.question(`Ingrese el nuevo titulo de la tarea (actual: ${tareaSeleccionada.titulo}): `);
+    const descripcion = rl.question(`Ingrese la nueva descripcion de la tarea (actual: ${tareaSeleccionada.descripcion}): `);
+    const fechaVencimiento = rl.question(`Ingrese la nueva fecha de vencimiento de la tarea (actual: ${tareaSeleccionada.fechaVencimiento}): `);
+    console.log("Seleccione la nueva dificultad de la tarea:");
+    console.log("1. Fácil");
+    console.log("2. Media");
+    console.log("3. Difícil");
+    const dificultadInput = rl.question('> ');
+
+    tareaSeleccionada.titulo = titulo || tareaSeleccionada.titulo;
+    tareaSeleccionada.descripcion = descripcion || tareaSeleccionada.descripcion;
+    tareaSeleccionada.fechaVencimiento = fechaVencimiento || tareaSeleccionada.fechaVencimiento;
+    
+    const dificultad = parseInt(dificultadInput);
+    if (!isNaN(dificultad) && dificultad >= 1 && dificultad <= 3) {
+        tareaSeleccionada.dificultad = dificultad;
+    }
+
+    console.clear();
+    console.log('Tarea editada exitosamente.');
 }
 
 function buscarTareas() {
@@ -74,7 +97,7 @@ function buscarTareas() {
         console.log('No se encontraron tareas con ese termino.');
     } else {
         console.log('\n¿Desea ver los detalles de alguna tarea? (Ingrese el numero o 0 para volver)');
-        const opcion = rl.question('>');
+        const opcion = rl.question('> ');
         const index = parseInt(opcion) - 1;
 
         if (index >= 0 && index < resultados.length) {
@@ -88,10 +111,15 @@ function buscarTareas() {
             console.log(`Fecha de vencimiento: ${tareaSeleccionada.fechaVencimiento}`);
             console.log(`Estado: ${tareaSeleccionada.estado}`);
             console.log(`Dificultad: ${tareaSeleccionada.dificultad}`);
-            
-        } else if (opcion !== '0') {
-            console.log('Opción no válida.');
-        }
+
+            console.log('\nDesea editar la tarea? (s/n)');
+            const confirmacion = rl.question('> ');
+            if (confirmacion === 's') {
+                editarTarea(tareaSeleccionada);
+            }  else if (opcion !== 'n') {
+                console.log('Opción no válida.');
+            }
+        }    
     }
     
 
@@ -105,57 +133,75 @@ function buscarTareas() {
 function mostrarTareas() {
     console.clear();
     const lista = obtenerTodas();
-    const decision = rl.question('¿Que tareas deseas ver?');
+    console.log('--- LISTA DE TAREAS ---');
+    console.log('¿Que tareas deseas ver?');
+    console.log('1. Todas las tareas');
+    console.log('2. Tareas pendientes');
+    console.log('3. Tareas en progreso');
+    console.log('4. Tareas completadas');
+    console.log('0. Volver al menu principal');
+    const decision = rl.question('> ');
     switch (decision) {
-        case 1: {
+        case '1': {
             for (let i = 0; i < lista.length; i++) {
                 console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
             }
             if (lista.length === 0) {
                 console.log('No hay tareas registradas');
+                console.log('\nPresione Enter para continuar...');
+                rl.question('');
+                console.clear();
+                menuPrincipal();
             }
 
         }
 
-        case 2: {
+        case '2': {
             for (let i = 0; i < lista.length; i++) {
-                if (lista[i].estado === '') {
-
+                if (lista[i].estado === 1) {
+                    console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
                 }
             }
+            console.log('\nPresione Enter para continuar...');
+            rl.question('');
+            console.clear();
+            menuPrincipal();
+            break;
         }
 
-        case 3: {
-
+        case '3': {
+            for (let i = 0; i < lista.length; i++) {
+                if (lista[i].estado === 2) {
+                    console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
+                }
+            }
+            console.log('\nPresione Enter para continuar...');
+            rl.question('');
+            console.clear();
+            menuPrincipal();
+            break;
         }
 
-        case 4: {
-
+        case '4': {
+            for (let i = 0; i < lista.length; i++) {
+                if (lista[i].estado === 3) {
+                    console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
+                }
+            }
+            console.log('\nPresione Enter para continuar...');
+            rl.question('');
+            console.clear();
+            menuPrincipal();
         }
 
-        case 0: {
-
+        case '0': {
+            console.clear();
+            menuPrincipal();
+            break;
         }
 
         default: {
-
+            console.log('Opción no válida.');
         }
     }
-
- /*   console.log('--- LISTA DE TAREAS ---');
-    
-    const lista = obtenerTodas();
-    
-    for (let i = 0; i < lista.length; i++) {
-        console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
-    }
-    
-    if (lista.length === 0) {
-        console.log('No hay tareas registradas.');
-    }
-    
-    console.log('\nPresione Enter para volver al menu principal...');
-    rl.question('');
-    console.clear();
-    menuPrincipal(); */
 }
