@@ -34,7 +34,11 @@ function agregarTarea() {
     const titulo = rl.question('Ingrese el titulo de la tarea: ');
     const descripcion = rl.question('Ingrese la descripcion de la tarea: ');
     const fechaVencimiento = rl.question('Ingrese la fecha de vencimiento de la tarea (YYYY-MM-DD): ');
-    const dificultad = rl.question('Ingrese la dificultad de la tarea: ');
+    console.log("Seleccione la dificultad de la tarea:");
+    console.log("1. Fácil");
+    console.log("2. Media");
+    console.log("3. Difícil");
+    const dificultad = rl.question('>');
     
     const nuevaTarea = {
         titulo: titulo,
@@ -100,7 +104,45 @@ function buscarTareas() {
 
 function mostrarTareas() {
     console.clear();
-    console.log('--- LISTA DE TAREAS ---');
+    const lista = obtenerTodas();
+    const decision = rl.question('¿Que tareas deseas ver?');
+    switch (decision) {
+        case 1: {
+            for (let i = 0; i < lista.length; i++) {
+                console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
+            }
+            if (lista.length === 0) {
+                console.log('No hay tareas registradas');
+            }
+
+        }
+
+        case 2: {
+            for (let i = 0; i < lista.length; i++) {
+                if (lista[i].estado === '') {
+
+                }
+            }
+        }
+
+        case 3: {
+
+        }
+
+        case 4: {
+
+        }
+
+        case 0: {
+
+        }
+
+        default: {
+
+        }
+    }
+
+ /*   console.log('--- LISTA DE TAREAS ---');
     
     const lista = obtenerTodas();
     
@@ -115,5 +157,5 @@ function mostrarTareas() {
     console.log('\nPresione Enter para volver al menu principal...');
     rl.question('');
     console.clear();
-    menuPrincipal();
+    menuPrincipal(); */
 }
