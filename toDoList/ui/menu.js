@@ -30,16 +30,37 @@ export function menuPrincipal() {
     }
 }
 
+function validarTitulo(titulo) {
+    while (titulo === '' || titulo === null || titulo === undefined) {
+        console.log('El titulo no puede estar vacío. Ingrese un titulo válido.');
+        titulo = rl.question('Ingrese el titulo de la tarea: ');
+    }
+    return titulo;
+}
+
+function validarDificultad(dificultad) {
+    while (isNaN(dificultad) || dificultad < 1 || dificultad > 3) {
+        console.log('La dificultad debe ser un número entre 1 y 3. Ingrese una dificultad válida.');
+        dificultad = parseInt(rl.question('Ingrese la dificultad de la tarea (1-3): '));
+    }
+    return dificultad;
+}
+
 function agregarTarea() {
-    const titulo = rl.question('Ingrese el titulo de la tarea: ');
+    let titulo = rl.question('Ingrese el titulo de la tarea: ');
+    titulo = validarTitulo(titulo);
+    
     const descripcion = rl.question('Ingrese la descripcion de la tarea: ');
     const fechaVencimiento = rl.question('Ingrese la fecha de vencimiento de la tarea (YYYY-MM-DD): ');
+    
     console.log("Seleccione la dificultad de la tarea:");
     console.log("1. Fácil");
     console.log("2. Media");
     console.log("3. Difícil");
-    const dificultad = parseInt(rl.question('> '));
     
+    let dificultad = parseInt(rl.question('> '));
+    dificultad = validarDificultad(dificultad);
+
     const nuevaTarea = {
         titulo: titulo,
         descripcion: descripcion,
@@ -60,6 +81,7 @@ function editarTarea(tareaSeleccionada) {
     const titulo = rl.question(`Ingrese el nuevo titulo de la tarea (actual: ${tareaSeleccionada.titulo}): `);
     const descripcion = rl.question(`Ingrese la nueva descripcion de la tarea (actual: ${tareaSeleccionada.descripcion}): `);
     const fechaVencimiento = rl.question(`Ingrese la nueva fecha de vencimiento de la tarea (actual: ${tareaSeleccionada.fechaVencimiento}): `);
+    
     console.log("Seleccione la nueva dificultad de la tarea:");
     console.log("1. Fácil");
     console.log("2. Media");
@@ -70,8 +92,9 @@ function editarTarea(tareaSeleccionada) {
     tareaSeleccionada.descripcion = descripcion || tareaSeleccionada.descripcion;
     tareaSeleccionada.fechaVencimiento = fechaVencimiento || tareaSeleccionada.fechaVencimiento;
     
-    const dificultad = parseInt(dificultadInput);
-    if (!isNaN(dificultad) && dificultad >= 1 && dificultad <= 3) {
+    if (dificultadInput !== '') {
+        let dificultad = parseInt(dificultadInput);
+        dificultad = validarDificultad(dificultad);
         tareaSeleccionada.dificultad = dificultad;
     }
 
@@ -101,7 +124,6 @@ function buscarTareas() {
         const index = parseInt(opcion) - 1;
 
         if (index >= 0 && index < resultados.length) {
-
             const tareaSeleccionada = resultados[index];
             console.clear();
 
@@ -114,15 +136,16 @@ function buscarTareas() {
 
             console.log('\nDesea editar la tarea? (s/n)');
             const confirmacion = rl.question('> ');
+            
             if (confirmacion === 's') {
                 editarTarea(tareaSeleccionada);
-            }  else if (opcion !== 'n') {
+            } else if (confirmacion !== 'n') {
                 console.log('Opción no válida.');
             }
-        }    
+        } else if (opcion !== '0') {
+            console.log('Opción no válida.');
+        }
     }
-    
-
     
     console.log('\nPresione Enter para continuar...');
     rl.question('');
@@ -141,6 +164,7 @@ function mostrarTareas() {
     console.log('4. Tareas completadas');
     console.log('0. Volver al menu principal');
     const decision = rl.question('> ');
+    
     switch (decision) {
         case '1': {
             for (let i = 0; i < lista.length; i++) {
@@ -148,17 +172,17 @@ function mostrarTareas() {
             }
             if (lista.length === 0) {
                 console.log('No hay tareas registradas');
-                console.log('\nPresione Enter para continuar...');
-                rl.question('');
-                console.clear();
-                menuPrincipal();
             }
-
+            console.log('\nPresione Enter para continuar...');
+            rl.question('');
+            console.clear();
+            menuPrincipal();
+            break;
         }
 
         case '2': {
             for (let i = 0; i < lista.length; i++) {
-                if (lista[i].estado === 1) {
+                if (lista[i].estado === 'Pendiente') {
                     console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
                 }
             }
@@ -171,7 +195,7 @@ function mostrarTareas() {
 
         case '3': {
             for (let i = 0; i < lista.length; i++) {
-                if (lista[i].estado === 2) {
+                if (lista[i].estado === 'En progreso') {
                     console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
                 }
             }
@@ -184,7 +208,7 @@ function mostrarTareas() {
 
         case '4': {
             for (let i = 0; i < lista.length; i++) {
-                if (lista[i].estado === 3) {
+                if (lista[i].estado === 'Completada') {
                     console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
                 }
             }
@@ -192,6 +216,7 @@ function mostrarTareas() {
             rl.question('');
             console.clear();
             menuPrincipal();
+            break;
         }
 
         case '0': {
@@ -202,6 +227,11 @@ function mostrarTareas() {
 
         default: {
             console.log('Opción no válida.');
+            console.log('\nPresione Enter para continuar...');
+            rl.question('');
+            console.clear();
+            menuPrincipal();
+            break;
         }
     }
 }
