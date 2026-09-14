@@ -1,5 +1,5 @@
 import rl from 'readline-sync';
-import { tareas, agregar, obtenerTodas, buscarPorTitulo } from '../data/tareas.js';
+import { agregar, obtenerTodas, buscarPorTitulo, obtenerPorEstado, actualizarTarea } from '../data/tareas.js';
 
 export function menuPrincipal() {
     console.log('\n1. Agregar tarea');
@@ -30,26 +30,26 @@ export function menuPrincipal() {
     }
 }
 
-function validarTitulo(titulo) {
-    while (titulo === '' || titulo === null || titulo === undefined) {
+function pedirTituloValido(mensaje) {
+    let titulo = rl.question(mensaje);
+    while (titulo.trim() === '') {
         console.log('El titulo no puede estar vacío. Ingrese un titulo válido.');
-        titulo = rl.question('Ingrese el titulo de la tarea: ');
+        titulo = rl.question(mensaje);
     }
     return titulo;
 }
 
-function validarDificultad(dificultad) {
+function pedirDificultadValida(mensaje) {
+    let dificultad = parseInt(rl.question(mensaje));
     while (isNaN(dificultad) || dificultad < 1 || dificultad > 3) {
         console.log('La dificultad debe ser un número entre 1 y 3. Ingrese una dificultad válida.');
-        dificultad = parseInt(rl.question('Ingrese la dificultad de la tarea (1-3): '));
+        dificultad = parseInt(rl.question(mensaje));
     }
     return dificultad;
 }
 
 function agregarTarea() {
-    let titulo = rl.question('Ingrese el titulo de la tarea: ');
-    titulo = validarTitulo(titulo);
-    
+    const titulo = pedirTituloValido('Ingrese el titulo de la tarea: ');
     const descripcion = rl.question('Ingrese la descripcion de la tarea: ');
     const fechaVencimiento = rl.question('Ingrese la fecha de vencimiento de la tarea (YYYY-MM-DD): ');
     
@@ -57,9 +57,7 @@ function agregarTarea() {
     console.log("1. Fácil");
     console.log("2. Media");
     console.log("3. Difícil");
-    
-    let dificultad = parseInt(rl.question('> '));
-    dificultad = validarDificultad(dificultad);
+    const dificultad = pedirDificultadValida('> ');
 
     const nuevaTarea = {
         titulo: titulo,
@@ -88,15 +86,23 @@ function editarTarea(tareaSeleccionada) {
     console.log("3. Difícil");
     const dificultadInput = rl.question('> ');
 
-    tareaSeleccionada.titulo = titulo || tareaSeleccionada.titulo;
-    tareaSeleccionada.descripcion = descripcion || tareaSeleccionada.descripcion;
-    tareaSeleccionada.fechaVencimiento = fechaVencimiento || tareaSeleccionada.fechaVencimiento;
-    
-    if (dificultadInput !== '') {
+    const nuevosDatos = {
+        titulo: titulo.trim() !== '' ? titulo : tareaSeleccionada.titulo,
+        descripcion: descripcion.trim() !== '' ? descripcion : tareaSeleccionada.descripcion,
+        fechaVencimiento: fechaVencimiento.trim() !== '' ? fechaVencimiento : tareaSeleccionada.fechaVencimiento,
+        dificultad: tareaSeleccionada.dificultad 
+    };
+
+    if (dificultadInput.trim() !== '') {
         let dificultad = parseInt(dificultadInput);
-        dificultad = validarDificultad(dificultad);
-        tareaSeleccionada.dificultad = dificultad;
+        while (isNaN(dificultad) || dificultad < 1 || dificultad > 3) {
+            console.log('La dificultad debe ser un número entre 1 y 3.');
+            dificultad = parseInt(rl.question('> '));
+        }
+        nuevosDatos.dificultad = dificultad;
     }
+
+    actualizarTarea(tareaSeleccionada, nuevosDatos);
 
     console.clear();
     console.log('Tarea editada exitosamente.');
@@ -155,7 +161,6 @@ function buscarTareas() {
 
 function mostrarTareas() {
     console.clear();
-    const lista = obtenerTodas();
     console.log('--- LISTA DE TAREAS ---');
     console.log('¿Que tareas deseas ver?');
     console.log('1. Todas las tareas');
@@ -165,73 +170,44 @@ function mostrarTareas() {
     console.log('0. Volver al menu principal');
     const decision = rl.question('> ');
     
+    let listaAMostrar = [];
+
     switch (decision) {
-        case '1': {
-            for (let i = 0; i < lista.length; i++) {
-                console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
-            }
-            if (lista.length === 0) {
-                console.log('No hay tareas registradas');
-            }
-            console.log('\nPresione Enter para continuar...');
-            rl.question('');
+        case '1':
+            listaAMostrar = obtenerTodas();
+            break;
+        case '2':
+            listaAMostrar = obtenerPorEstado('Pendiente');
+            break;
+        case '3':
+            listaAMostrar = obtenerPorEstado('En progreso');
+            break;
+        case '4':
+            listaAMostrar = obtenerPorEstado('Completada');
+            break;
+        case '0':
             console.clear();
             menuPrincipal();
-            break;
-        }
-
-        case '2': {
-            for (let i = 0; i < lista.length; i++) {
-                if (lista[i].estado === 'Pendiente') {
-                    console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
-                }
-            }
-            console.log('\nPresione Enter para continuar...');
-            rl.question('');
-            console.clear();
-            menuPrincipal();
-            break;
-        }
-
-        case '3': {
-            for (let i = 0; i < lista.length; i++) {
-                if (lista[i].estado === 'En progreso') {
-                    console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
-                }
-            }
-            console.log('\nPresione Enter para continuar...');
-            rl.question('');
-            console.clear();
-            menuPrincipal();
-            break;
-        }
-
-        case '4': {
-            for (let i = 0; i < lista.length; i++) {
-                if (lista[i].estado === 'Completada') {
-                    console.log(`${i + 1}. [${lista[i].estado}] ${lista[i].titulo}`);
-                }
-            }
-            console.log('\nPresione Enter para continuar...');
-            rl.question('');
-            console.clear();
-            menuPrincipal();
-            break;
-        }
-
-        case '0': {
-            console.clear();
-            menuPrincipal();
-            break;
-        }
-
-        default: {
+            return;
+        default:
             console.log('Opción no válida.');
             console.log('\nPresione Enter para continuar...');
             rl.question('');
             console.clear();
             menuPrincipal();
-            break;
-        }
+            return;
     }
+
+    for (let i = 0; i < listaAMostrar.length; i++) {
+        console.log(`${i + 1}. [${listaAMostrar[i].estado}] ${listaAMostrar[i].titulo}`);
+    }
+
+    if (listaAMostrar.length === 0) {
+        console.log('No hay tareas registradas en esta categoria.');
+    }
+
+    console.log('\nPresione Enter para continuar...');
+    rl.question('');
+    console.clear();
+    menuPrincipal();
 }
